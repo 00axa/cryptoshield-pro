@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CryptoShield Pro | Professional Hashing Suite</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- CryptoJS Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        nordic: {
+                            bg: '#f4f7f6',
+                            card: '#ffffff',
+                            mint: '#f0fdfa',
+                            border: '#ccfbf1',
+                            primary: '#0d9488',
+                            hover: '#0f766e',
+                            darktext: '#134e4a'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-nordic-bg text-slate-800 min-h-screen font-sans antialiased selection:bg-teal-500 selection:text-white">
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-5 right-5 bg-teal-900 text-white text-xs px-4 py-3 rounded-xl shadow-2xl transition-all duration-300 opacity-0 transform translate-y-4 z-50 flex items-center space-x-2">
+        <i class="fa-solid fa-circle-check text-teal-300"></i>
+        <span id="toast-msg">Copied to clipboard!</span>
+    </div>
+
+    <!-- Header Section -->
+    <header class="border-b border-teal-100 bg-white/90 backdrop-blur sticky top-0 z-40 shadow-xs">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-3.5">
+                <div class="bg-gradient-to-tr from-teal-600 to-emerald-600 p-2.5 rounded-2xl shadow-md shadow-teal-200 text-white">
+                    <i class="fa-solid fa-shield-halved text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-extrabold tracking-tight text-slate-900 flex items-center">
+                        CryptoShield 
+                        <span class="text-[11px] font-bold px-2.5 py-0.5 bg-teal-50 text-teal-700 rounded-full border border-teal-200 ml-2">v2.0 Pro</span>
+                    </h1>
+                    <p class="text-xs text-slate-500">Secure Client-Side Cryptographic Hashing Engine</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-3">
+                <span class="text-xs font-semibold px-3.5 py-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full flex items-center">
+                    <i class="fa-solid fa-lock text-[10px] mr-1.5 text-emerald-600"></i>100% Zero-Server Privacy
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-7xl mx-auto px-6 py-8 space-y-8">
+        
+        <!-- Input Panel Card -->
+        <div class="bg-white border border-teal-100 rounded-3xl p-6 shadow-xl shadow-teal-900/5 space-y-6">
+            <div class="flex flex-wrap justify-between items-center border-b border-slate-100 pb-4 gap-4">
+                <div class="flex space-x-2 bg-slate-100/80 p-1.5 rounded-2xl border border-slate-200/60">
+                    <button onclick="switchTab('text')" id="tab-text" class="px-5 py-2 rounded-xl text-xs font-bold bg-teal-600 text-white shadow-sm transition-all flex items-center space-x-2">
+                        <i class="fa-solid fa-font"></i><span>Text Input</span>
+                    </button>
+                    <button onclick="switchTab('file')" id="tab-file" class="px-5 py-2 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-900 transition-all flex items-center space-x-2">
+                        <i class="fa-solid fa-file-shield"></i><span>File Integrity Check</span>
+                    </button>
+                </div>
+                
+                <!-- HMAC Option -->
+                <div class="flex items-center space-x-2.5 bg-teal-50/70 px-4 py-2 rounded-2xl border border-teal-100">
+                    <input type="checkbox" id="enableHmac" onchange="toggleHmacField()" class="w-4 h-4 accent-teal-600 cursor-pointer rounded">
+                    <label for="enableHmac" class="text-xs font-bold text-teal-900 cursor-pointer">Enable HMAC Keyed Hash</label>
+                </div>
+            </div>
+
+            <!-- HMAC Key Container -->
+            <div id="hmac-container" class="hidden space-y-2 bg-teal-50 p-4 rounded-2xl border border-teal-200/80">
+                <label class="block text-xs font-bold text-teal-900 uppercase tracking-wider">HMAC Secret Passphrase / Key:</label>
+                <input type="text" id="hmacKey" oninput="generateAllHashes()" placeholder="Enter key (e.g. secret_api_key)..." class="w-full bg-white border border-teal-300 rounded-xl p-3 text-slate-800 focus:outline-none focus:ring-2 focus:ring-teal-500 font-mono text-xs shadow-xs">
+            </div>
+
+            <!-- Text Panel -->
+            <div id="panel-text" class="space-y-3">
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Plaintext / Payload Input:</label>
+                <textarea id="inputText" rows="4" placeholder="Type or paste payload here to generate cryptographic digests instantly..." class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-500 transition font-mono text-xs shadow-inner"></textarea>
+            </div>
+
+            <!-- File Panel -->
+            <div id="panel-file" class="hidden space-y-3">
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Upload File For Checksum Verification:</label>
+                <input type="file" id="inputFile" onchange="handleFileUpload(event)" class="w-full bg-slate-50 border border-dashed border-slate-300 rounded-2xl p-6 text-slate-600 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-teal-600 file:text-white hover:file:bg-teal-700 cursor-pointer">
+            </div>
+
+            <!-- Export Buttons -->
+            <div class="flex justify-between items-center pt-2 border-t border-slate-100">
+                <span class="text-xs text-slate-400 font-medium"><i class="fa-solid fa-bolt text-teal-500 mr-1"></i>Real-time client-side hashing</span>
+                <div class="flex space-x-2">
+                    <button onclick="exportResults('json')" class="text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 px-3.5 py-2 rounded-xl transition flex items-center">
+                        <i class="fa-solid fa-code text-teal-600 mr-1.5"></i>Export JSON
+                    </button>
+                    <button onclick="exportResults('txt')" class="text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 px-3.5 py-2 rounded-xl transition flex items-center">
+                        <i class="fa-solid fa-file-lines text-teal-600 mr-1.5"></i>Export TXT
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Verification Box -->
+        <div class="bg-gradient-to-r from-teal-50/80 to-emerald-50/80 border border-teal-200/80 rounded-3xl p-5 shadow-sm space-y-3">
+            <label class="block text-xs font-bold text-teal-900 uppercase tracking-wider flex items-center">
+                <i class="fa-solid fa-magnifying-glass text-teal-600 mr-2"></i> Hash Verification & Comparison Tool
+            </label>
+            <div class="flex gap-3">
+                <input type="text" id="verifyHashInput" oninput="verifyHashMatch()" placeholder="Paste official hash (MD5, SHA-1, SHA-256, SHA-512) here to test integrity..." class="w-full bg-white border border-teal-200 rounded-xl p-3 text-slate-800 focus:outline-none focus:ring-2 focus:ring-teal-500 font-mono text-xs">
+            </div>
+            <div id="verifyStatus" class="hidden p-3 rounded-xl text-xs font-bold transition-all"></div>
+        </div>
+
+        <!-- Output Cards Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            
+            <!-- MD5 Card -->
+            <div class="bg-white border border-slate-200/80 rounded-3xl p-5 shadow-md shadow-slate-200/40 flex flex-col justify-between space-y-3 hover:border-teal-300 transition-all">
+                <div class="flex justify-between items-center">
+                    <span class="text-xs font-bold uppercase tracking-wider text-amber-700 flex items-center">
+                        <i class="fa-solid fa-shield-cat mr-1.5"></i> MD5 (128-bit)
+                    </span>
+                    <button onclick="copyHash('md5-out')" class="text-xs px-3 py-1 bg-slate-100 hover:bg-teal-50 hover:text-teal-700 text-slate-600 font-bold border border-slate-200 rounded-xl transition"><i class="fa-regular fa-copy mr-1"></i>Copy</button>
+                </div>
+                <div id="md5-out" class="bg-nordic-mint text-nordic-darktext font-bold p-3.5 rounded-2xl font-mono text-xs break-all border border-nordic-border min-h-[44px] flex items-center">--</div>
+            </div>
+
+            <!-- SHA-1 Card -->
+            <div class="bg-white border border-slate-200/80 rounded-3xl p-5 shadow-md shadow-slate-200/40 flex flex-col justify-between space-y-3 hover:border-teal-300 transition-all">
+                <div class="flex justify-between items-center">
+                    <span class="text-xs font-bold uppercase tracking-wider text-blue-700 flex items-center">
+                        <i class="fa-solid fa-key mr-1.5"></i> SHA-1 (160-bit)
+                    </span>
+                    <button onclick="copyHash('sha1-out')" class="text-xs px-3 py-1 bg-slate-100 hover:bg-teal-50 hover:text-teal-700 text-slate-600 font-bold border border-slate-200 rounded-xl transition"><i class="fa-regular fa-copy mr-1"></i>Copy</button>
+                </div>
+                <div id="sha1-out" class="bg-nordic-mint text-nordic-darktext font-bold p-3.5 rounded-2xl font-mono text-xs break-all border border-nordic-border min-h-[44px] flex items-center">--</div>
+            </div>
+
+            <!-- SHA-256 Card -->
+            <div class="bg-white border border-slate-200/80 rounded-3xl p-5 shadow-md shadow-slate-200/40 flex flex-col justify-between space-y-3 md:col-span-2 hover:border-teal-300 transition-all">
+                <div class="flex justify-between items-center">
+                    <span class="text-xs font-bold uppercase tracking-wider text-teal-700 flex items-center">
+                        <i class="fa-solid fa-lock mr-1.5"></i> SHA-256 (256-bit Industry Standard)
+                    </span>
+                    <button onclick="copyHash('sha256-out')" class="text-xs px-3 py-1 bg-slate-100 hover:bg-teal-50 hover:text-teal-700 text-slate-600 font-bold border border-slate-200 rounded-xl transition"><i class="fa-regular fa-copy mr-1"></i>Copy</button>
+                </div>
+                <div id="sha256-out" class="bg-nordic-mint text-nordic-darktext font-bold p-3.5 rounded-2xl font-mono text-xs break-all border border-nordic-border min-h-[44px] flex items-center">--</div>
+            </div>
+
+            <!-- SHA-512 Card -->
+            <div class="bg-white border border-slate-200/80 rounded-3xl p-5 shadow-md shadow-slate-200/40 flex flex-col justify-between space-y-3 md:col-span-2 hover:border-teal-300 transition-all">
+                <div class="flex justify-between items-center">
+                    <span class="text-xs font-bold uppercase tracking-wider text-emerald-800 flex items-center">
+                        <i class="fa-solid fa-shield-virus mr-1.5"></i> SHA-512 (512-bit High Security)
+                    </span>
+                    <button onclick="copyHash('sha512-out')" class="text-xs px-3 py-1 bg-slate-100 hover:bg-teal-50 hover:text-teal-700 text-slate-600 font-bold border border-slate-200 rounded-xl transition"><i class="fa-regular fa-copy mr-1"></i>Copy</button>
+                </div>
+                <div id="sha512-out" class="bg-nordic-mint text-nordic-darktext font-bold p-3.5 rounded-2xl font-mono text-xs break-all border border-nordic-border min-h-[44px] flex items-center">--</div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <script>
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-msg').innerText = msg;
+            toast.classList.remove('opacity-0', 'translate-y-4');
+            toast.classList.add('opacity-100', 'translate-y-0');
+            setTimeout(() => {
+                toast.classList.remove('opacity-100', 'translate-y-0');
+                toast.classList.add('opacity-0', 'translate-y-4');
+            }, 2000);
+        }
+
+        function switchTab(mode) {
+            const textTab = document.getElementById('tab-text');
+            const fileTab = document.getElementById('tab-file');
+            const textPanel = document.getElementById('panel-text');
+            const filePanel = document.getElementById('panel-file');
+
+            if(mode === 'text') {
+                textTab.className = "px-5 py-2 rounded-xl text-xs font-bold bg-teal-600 text-white shadow-sm transition-all flex items-center space-x-2";
+                fileTab.className = "px-5 py-2 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-900 transition-all flex items-center space-x-2";
+                textPanel.classList.remove('hidden');
+                filePanel.classList.add('hidden');
+                generateAllHashes();
+            } else {
+                fileTab.className = "px-5 py-2 rounded-xl text-xs font-bold bg-teal-600 text-white shadow-sm transition-all flex items-center space-x-2";
+                textTab.className = "px-5 py-2 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-900 transition-all flex items-center space-x-2";
+                filePanel.classList.remove('hidden');
+                textPanel.classList.add('hidden');
+            }
+        }
+
+        function toggleHmacField() {
+            const isChecked = document.getElementById('enableHmac').checked;
+            const hmacContainer = document.getElementById('hmac-container');
+            if(isChecked) {
+                hmacContainer.classList.remove('hidden');
+            } else {
+                hmacContainer.classList.add('hidden');
+                document.getElementById('hmacKey').value = '';
+            }
+            generateAllHashes();
+        }
+
+        async function generateAllHashes() {
+            const text = document.getElementById('inputText').value;
+            const hmacEnabled = document.getElementById('enableHmac').checked;
+            const hmacKey = document.getElementById('hmacKey').value;
+
+            if(!text) {
+                document.getElementById('md5-out').innerText = '--';
+                document.getElementById('sha1-out').innerText = '--';
+                document.getElementById('sha256-out').innerText = '--';
+                document.getElementById('sha512-out').innerText = '--';
+                verifyHashMatch();
+                return;
+            }
+
+            if(hmacEnabled && hmacKey) {
+                document.getElementById('md5-out').innerText = CryptoJS.HmacMD5(text, hmacKey).toString();
+                document.getElementById('sha1-out').innerText = CryptoJS.HmacSHA1(text, hmacKey).toString();
+                document.getElementById('sha256-out').innerText = CryptoJS.HmacSHA256(text, hmacKey).toString();
+                document.getElementById('sha512-out').innerText = CryptoJS.HmacSHA512(text, hmacKey).toString();
+            } else {
+                document.getElementById('md5-out').innerText = CryptoJS.MD5(text).toString();
+
+                const encoder = new TextEncoder();
+                const data = encoder.encode(text);
+
+                const sha1Hash = await crypto.subtle.digest('SHA-1', data);
+                document.getElementById('sha1-out').innerText = bufferToHex(sha1Hash);
+
+                const sha256Hash = await crypto.subtle.digest('SHA-256', data);
+                document.getElementById('sha256-out').innerText = bufferToHex(sha256Hash);
+
+                const sha512Hash = await crypto.subtle.digest('SHA-512', data);
+                document.getElementById('sha512-out').innerText = bufferToHex(sha512Hash);
+            }
+            verifyHashMatch();
+        }
+
+        document.getElementById('inputText').addEventListener('input', generateAllHashes);
+
+        async function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if(!file) return;
+
+            const buffer = await file.arrayBuffer();
+            const wordArray = CryptoJS.lib.WordArray.create(buffer);
+            
+            document.getElementById('md5-out').innerText = CryptoJS.MD5(wordArray).toString();
+
+            const sha1Hash = await crypto.subtle.digest('SHA-1', buffer);
+            document.getElementById('sha1-out').innerText = bufferToHex(sha1Hash);
+
+            const sha256Hash = await crypto.subtle.digest('SHA-256', buffer);
+            document.getElementById('sha256-out').innerText = bufferToHex(sha256Hash);
+
+            const sha512Hash = await crypto.subtle.digest('SHA-512', buffer);
+            document.getElementById('sha512-out').innerText = bufferToHex(sha512Hash);
+            
+            verifyHashMatch();
+        }
+
+        function verifyHashMatch() {
+            const inputVal = document.getElementById('verifyHashInput').value.trim().toLowerCase();
+            const statusDiv = document.getElementById('verifyStatus');
+
+            if(!inputVal) {
+                statusDiv.classList.add('hidden');
+                return;
+            }
+
+            const md5 = document.getElementById('md5-out').innerText.toLowerCase();
+            const sha1 = document.getElementById('sha1-out').innerText.toLowerCase();
+            const sha256 = document.getElementById('sha256-out').innerText.toLowerCase();
+            const sha512 = document.getElementById('sha512-out').innerText.toLowerCase();
+
+            statusDiv.classList.remove('hidden');
+
+            if([md5, sha1, sha256, sha512].includes(inputVal)) {
+                statusDiv.className = "p-3 rounded-xl text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center";
+                statusDiv.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600 mr-2 text-sm"></i> MATCH CONFIRMED! Target hash matches calculated signature.`;
+            } else {
+                statusDiv.className = "p-3 rounded-xl text-xs font-bold bg-rose-100 text-rose-800 border border-rose-300 flex items-center";
+                statusDiv.innerHTML = `<i class="fa-solid fa-circle-xmark text-rose-600 mr-2 text-sm"></i> MISMATCH! Input hash does not match computed signatures.`;
+            }
+        }
+
+        function bufferToHex(buffer) {
+            return Array.from(new Uint8Array(buffer))
+                .map(b => b.toString(16).padStart(2, '0'))
+                .join('');
+        }
+
+        function copyHash(elementId) {
+            const text = document.getElementById(elementId).innerText;
+            if(text === '--') return;
+            navigator.clipboard.writeText(text);
+            showToast("Hash copied to clipboard!");
+        }
+
+        function exportResults(format) {
+            const md5 = document.getElementById('md5-out').innerText;
+            const sha1 = document.getElementById('sha1-out').innerText;
+            const sha256 = document.getElementById('sha256-out').innerText;
+            const sha512 = document.getElementById('sha512-out').innerText;
+
+            if(md5 === '--') {
+                alert("Please generate hashes first!");
+                return;
+            }
+
+            let content, filename, mime;
+            if(format === 'json') {
+                content = JSON.stringify({ md5, sha1, sha256, sha512 }, null, 4);
+                filename = 'hashes.json';
+                mime = 'application/json';
+            } else {
+                content = `MD5: ${md5}\nSHA-1: ${sha1}\nSHA-256: ${sha256}\nSHA-512: ${sha512}`;
+                filename = 'hashes.txt';
+                mime = 'text/plain';
+            }
+
+            const blob = new Blob([content], { type: mime });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+</html>
