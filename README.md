@@ -14,6 +14,7 @@ A professional, lightning-fast, and 100% secure client-side cryptographic hashin
 * **🔒 Zero-Server Privacy:** All computations run locally inside your browser using the native `SubtleCrypto` API and CryptoJS. No files or text are ever uploaded to a server.
 
 ---
+![CryptoShield Pro Preview](./s1.png)
 
 ## 🛠️ Tech Stack
 
